@@ -49,13 +49,22 @@ SELECT
   monetary,
   recency_flag || '-' || frequency_flag || '-' || monetary_flag AS rfm_segment,
   CASE
-    WHEN recency_flag='RH' AND frequency_flag='FH' AND monetary_flag='MH' THEN 'Unggulan'
-    WHEN recency_flag='RL' AND frequency_flag='FL' AND monetary_flag='ML' THEN 'Berisiko'
-    WHEN recency_flag='RL' AND frequency_flag='FH' AND monetary_flag='MH' THEN 'Pasif'
-    WHEN recency_flag='RH' AND frequency_flag='FL' AND monetary_flag='ML' THEN 'Baru'
-    WHEN recency_flag='RH' AND frequency_flag='FH' AND monetary_flag='ML' THEN 'Menjanjikan'
-    WHEN recency_flag='RL' AND frequency_flag='FL' AND monetary_flag='MH' THEN 'Eksklusif'
-    ELSE 'Lainnya'
+      WHEN recency_flag = 'RH' AND frequency_flag = 'FH' AND monetary_flag = 'MH'
+        THEN 'Unggulan'
+      WHEN recency_flag = 'RH' AND frequency_flag = 'FH' AND monetary_flag = 'ML'
+        THEN 'Potensial'
+      WHEN recency_flag = 'RH' AND frequency_flag = 'FL' AND monetary_flag = 'MH'
+        THEN 'Potensial'
+      WHEN recency_flag = 'RH' AND frequency_flag = 'FL' AND monetary_flag = 'ML'
+        THEN 'Baru'
+      WHEN recency_flag = 'RL' AND frequency_flag = 'FH' AND monetary_flag = 'MH'
+        THEN 'Pasif'
+      WHEN recency_flag = 'RL' AND frequency_flag = 'FH' AND monetary_flag = 'ML'
+        THEN 'Pasif'
+      WHEN recency_flag = 'RL' AND frequency_flag = 'FL' AND monetary_flag = 'MH'
+        THEN 'Eksklusif'
+      WHEN recency_flag = 'RL' AND frequency_flag = 'FL' AND monetary_flag = 'ML'
+        THEN 'Berisiko'
   END AS segment_label
 FROM flags;
 
