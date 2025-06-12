@@ -1,17 +1,47 @@
 #!/bin/bash
 
-# Nama file db dan tabel
-DB_NAME="ecommerce_transactions.db"
-TABLE_NAME="e_commerce_transactions"
+DB_NAME="ecommerce.db"
+TABLE_IMPORT="e_commerce_transactions_import"
+TABLE_FINAL="e_commerce_transactions"
 CSV_FILE="data/e_commerce_transactions.csv"
 
-# Hapus DB lama jika ada (opsional)
 rm -f $DB_NAME
 
-# Jalankan import ke SQLite
 sqlite3 $DB_NAME <<EOF
+PRAGMA journal_mode = OFF;
+PRAGMA synchronous = OFF;
+
 .mode csv
-.import $CSV_FILE $TABLE_NAME
+.import $CSV_FILE $TABLE_IMPORT
+
+DROP TABLE IF EXISTS $TABLE_FINAL;
+CREATE TABLE $TABLE_FINAL (
+    order_id      TEXT,
+    customer_id   TEXT,
+    order_date    DATE,
+    payment_value REAL,
+    decoy_flag    TEXT,
+    decoy_noise   REAL
+);
+
+BEGIN TRANSACTION;
+INSERT INTO $TABLE_FINAL (
+    order_id, customer_id, order_date, payment_value, decoy_flag, decoy_noise
+)
+SELECT
+    order_id,
+    customer_id,
+    order_date,
+    CAST(payment_value AS REAL),
+    decoy_flag,
+    CAST(decoy_noise AS REAL)
+FROM $TABLE_IMPORT;
+COMMIT;
+
+DROP TABLE $TABLE_IMPORT;
+
+PRAGMA journal_mode = DELETE;
+PRAGMA synchronous = FULL;
 EOF
 
-echo "Import selesai! File $CSV_FILE sudah masuk ke $DB_NAME (tabel: $TABLE_NAME)"
+echo "Import CSV ke SQL Lite Selesai!"
